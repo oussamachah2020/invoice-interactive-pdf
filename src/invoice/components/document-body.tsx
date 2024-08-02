@@ -1,3 +1,4 @@
+import { useState, ChangeEvent } from "react";
 import {
   Button,
   Input,
@@ -7,14 +8,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/";
+} from "@/components/ui";
 import { Reorder } from "framer-motion";
 import { LogsIcon, PlusIcon, TrashIcon } from "lucide-react";
-import { useState } from "react";
 
 interface Invoice {
   invoice: string;
-paymentStatus: string;
+  paymentStatus: string;
   paymentMethod: string;
   totalAmount: string;
 }
@@ -48,19 +48,26 @@ const initialInvoices: Invoice[] = [
 
 const DocumentBody = () => {
   const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices);
-  const [editingRow, setEditingRow] = useState(null);
-  const [tempValues, setTempValues] = useState({});
+  const [editingRow, setEditingRow] = useState<number | null>(null);
+  const [tempValues, setTempValues] = useState<Partial<Invoice>>({});
 
-  const handleDoubleClick = (index: number, field: string, value: string) => {
+  const handleDoubleClick = (
+    index: number,
+    field: keyof Invoice,
+    value: string
+  ) => {
     setEditingRow(index);
     setTempValues({ ...tempValues, [field]: value });
   };
 
-  const handleChange = (e, field) => {
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement>,
+    field: keyof Invoice
+  ) => {
     setTempValues({ ...tempValues, [field]: e.target.value });
   };
 
-  const handleBlur = (index) => {
+  const handleBlur = (index: number) => {
     const updatedInvoices = [...invoices];
     updatedInvoices[index] = { ...updatedInvoices[index], ...tempValues };
     setInvoices(updatedInvoices);
@@ -93,7 +100,7 @@ const DocumentBody = () => {
                     {editingRow === index ? (
                       <Input
                         type="text"
-                        value={tempValues.invoice || invoice.invoice}
+                        value={tempValues.invoice ?? invoice.invoice}
                         onChange={(e) => handleChange(e, "invoice")}
                         onBlur={() => handleBlur(index)}
                         className="h-3 w-20"
@@ -113,7 +120,7 @@ const DocumentBody = () => {
                       <Input
                         type="text"
                         value={
-                          tempValues.paymentStatus || invoice.paymentStatus
+                          tempValues.paymentStatus ?? invoice.paymentStatus
                         }
                         onChange={(e) => handleChange(e, "paymentStatus")}
                         onBlur={() => handleBlur(index)}
@@ -138,7 +145,7 @@ const DocumentBody = () => {
                       <Input
                         type="text"
                         value={
-                          tempValues.paymentMethod || invoice.paymentMethod
+                          tempValues.paymentMethod ?? invoice.paymentMethod
                         }
                         onChange={(e) => handleChange(e, "paymentMethod")}
                         onBlur={() => handleBlur(index)}
@@ -162,7 +169,7 @@ const DocumentBody = () => {
                     {editingRow === index ? (
                       <Input
                         type="text"
-                        value={tempValues.totalAmount || invoice.totalAmount}
+                        value={tempValues.totalAmount ?? invoice.totalAmount}
                         onChange={(e) => handleChange(e, "totalAmount")}
                         onBlur={() => handleBlur(index)}
                         className="h-3 w-20"
