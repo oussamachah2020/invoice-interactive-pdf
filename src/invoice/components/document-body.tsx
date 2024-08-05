@@ -1,6 +1,5 @@
 import { useState, ChangeEvent } from "react";
 import {
-  Button,
   Input,
   Table,
   TableBody,
@@ -10,7 +9,8 @@ import {
   TableRow,
 } from "@/components/ui";
 import { Reorder } from "framer-motion";
-import { LogsIcon, PlusIcon, TrashIcon } from "lucide-react";
+import { LogsIcon, TrashIcon } from "lucide-react";
+import NewRecordModal from "./modals/new-record-modal";
 
 interface Invoice {
   invoice: string;
@@ -197,16 +197,7 @@ const DocumentBody = () => {
           </TableBody>
         </Table>
       </Reorder.Group>
-      <Button
-        variant="outline"
-        className="mt-2 flex w-full justify-center gap-1 border-2 border-dashed p-3"
-        onClick={() => {
-          // Add logic to add a new record
-        }}
-      >
-        <PlusIcon className="h-4 w-4" />
-        <span>Add Record</span>
-      </Button>
+      <NewRecordModal />
     </div>
   );
 };
