@@ -1,7 +1,6 @@
 "use client";
 
 import { CalendarDays } from "lucide-react";
-import * as React from "react";
 
 import {
   Button,
@@ -10,9 +9,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui";
+import useClientInfoStore from "@/zustand/client-store";
 
 export function DatePicker() {
-  const [date, setDate] = React.useState<Date>();
+  const { setClientInfo } = useClientInfoStore();
 
   return (
     <Popover>
@@ -27,8 +27,12 @@ export function DatePicker() {
       <PopoverContent className="w-auto p-0">
         <Calendar
           mode="single"
-          selected={date}
-          onSelect={setDate}
+          onSelect={(val) => {
+            setClientInfo({
+              dueDate: val,
+              dateOfIssue: val,
+            });
+          }}
           initialFocus
         />
       </PopoverContent>

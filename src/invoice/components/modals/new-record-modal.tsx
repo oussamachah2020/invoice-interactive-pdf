@@ -6,7 +6,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   Input,
   Label,
 } from "@/components/ui";
@@ -14,6 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { PlusIcon } from "lucide-react";
 import z from "zod";
 import { useForm } from "react-hook-form";
+import useRecordStore from "@/zustand/record-store";
+import { useState } from "react";
 
 const formSchema = z.object({
   quantity: z.number(),
@@ -22,6 +23,9 @@ const formSchema = z.object({
 });
 
 const NewRecordModal = () => {
+  const { addItem } = useRecordStore();
+  const [isOpen, setIsOpen] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     defaultValues: {
       quantity: 0,
@@ -31,21 +35,31 @@ const NewRecordModal = () => {
   });
 
   function submit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+    addItem({
+      quantity: values.quantity,
+      rate: values.rate,
+      description: values.description,
+    });
+    form.reset();
+    setIsOpen(false);
   }
 
   return (
     <div>
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button
-            variant="outline"
-            className="mt-2 flex w-full justify-center gap-1 border-2 border-dashed p-3"
-          >
-            <PlusIcon className="h-4 w-4" />
-            <span>Add Record</span>
-          </Button>
-        </DialogTrigger>
+      <Dialog
+        open={isOpen}
+        onOpenChange={() => {
+          setIsOpen(false);
+        }}
+      >
+        <Button
+          variant="outline"
+          className="mt-2 flex w-full justify-center gap-1 border-2 border-dashed p-3"
+          onClick={() => setIsOpen(true)}
+        >
+          <PlusIcon className="h-4 w-4" />
+          <span>Add Record</span>
+        </Button>
         <DialogContent className="sm:max-w-[425px]">
           <form
             onSubmit={form.handleSubmit(submit)}

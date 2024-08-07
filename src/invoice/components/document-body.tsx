@@ -11,50 +11,20 @@ import {
 import { Reorder } from "framer-motion";
 import { LogsIcon, TrashIcon } from "lucide-react";
 import NewRecordModal from "./modals/new-record-modal";
-
-interface Invoice {
-  invoice: string;
-  paymentStatus: string;
-  paymentMethod: string;
-  totalAmount: string;
-}
-
-const initialInvoices: Invoice[] = [
-  {
-    invoice: "INV001",
-    paymentStatus: "Paid",
-    totalAmount: "$250.00",
-    paymentMethod: "Credit Card",
-  },
-  {
-    invoice: "INV002",
-    paymentStatus: "Pending",
-    totalAmount: "$150.00",
-    paymentMethod: "PayPal",
-  },
-  {
-    invoice: "INV003",
-    paymentStatus: "Unpaid",
-    totalAmount: "$350.00",
-    paymentMethod: "Bank Transfer",
-  },
-  {
-    invoice: "INV004",
-    paymentStatus: "Paid",
-    totalAmount: "$450.00",
-    paymentMethod: "Credit Card",
-  },
-];
+import useRecordStore, { RecordItem } from "@/zustand/record-store";
 
 const DocumentBody = () => {
-  const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices);
+  const items = useRecordStore((state) => state.items);
+  const addItem = useRecordStore((state) => state.addItem);
+  const removeItem = useRecordStore((state) => state.removeItem);
+  const reorderItems = useRecordStore((state) => state.reorderItems);
   const [editingRow, setEditingRow] = useState<number | null>(null);
-  const [tempValues, setTempValues] = useState<Partial<Invoice>>({});
+  const [tempValues, setTempValues] = useState<Partial<RecordItem>>({});
 
   const handleDoubleClick = (
     index: number,
-    field: keyof Invoice,
-    value: string
+    field: keyof RecordItem,
+    value: string | number
   ) => {
     setEditingRow(index);
     setTempValues({ ...tempValues, [field]: value });
@@ -62,22 +32,22 @@ const DocumentBody = () => {
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement>,
-    field: keyof Invoice
+    field: keyof RecordItem
   ) => {
     setTempValues({ ...tempValues, [field]: e.target.value });
   };
 
   const handleBlur = (index: number) => {
-    const updatedInvoices = [...invoices];
-    updatedInvoices[index] = { ...updatedInvoices[index], ...tempValues };
-    setInvoices(updatedInvoices);
+    const updatedItems = [...items];
+    updatedItems[index] = { ...updatedItems[index], ...tempValues };
+    addItem(updatedItems[index]); // Update the item in the store
     setEditingRow(null);
     setTempValues({});
   };
 
   return (
     <div className="mt-10">
-      <Reorder.Group axis="y" onReorder={setInvoices} values={invoices}>
+      <Reorder.Group axis="y" values={items} onReorder={reorderItems}>
         <Table className="w-full">
           <TableHeader className="flex w-full justify-start text-left">
             <TableRow className="flex w-full pt-5">
@@ -90,8 +60,8 @@ const DocumentBody = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {invoices.map((invoice, index) => (
-              <Reorder.Item key={invoice.invoice} value={invoice}>
+            {items.map((item, index) => (
+              <Reorder.Item key={item.description} value={item}>
                 <TableRow className="flex w-full">
                   <TableCell className="w-[50px]">
                     <LogsIcon className="h-5 w-5 cursor-move" />
@@ -100,29 +70,8 @@ const DocumentBody = () => {
                     {editingRow === index ? (
                       <Input
                         type="text"
-                        value={tempValues.invoice ?? invoice.invoice}
-                        onChange={(e) => handleChange(e, "invoice")}
-                        onBlur={() => handleBlur(index)}
-                        className="h-3 w-20"
-                      />
-                    ) : (
-                      <span
-                        onDoubleClick={() =>
-                          handleDoubleClick(index, "invoice", invoice.invoice)
-                        }
-                      >
-                        {invoice.invoice}
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell className="flex-1 text-left">
-                    {editingRow === index ? (
-                      <Input
-                        type="text"
-                        value={
-                          tempValues.paymentStatus ?? invoice.paymentStatus
-                        }
-                        onChange={(e) => handleChange(e, "paymentStatus")}
+                        value={tempValues.description ?? item.description}
+                        onChange={(e) => handleChange(e, "description")}
                         onBlur={() => handleBlur(index)}
                         className="h-3 w-20"
                       />
@@ -131,12 +80,12 @@ const DocumentBody = () => {
                         onDoubleClick={() =>
                           handleDoubleClick(
                             index,
-                            "paymentStatus",
-                            invoice.paymentStatus
+                            "description",
+                            item.description
                           )
                         }
                       >
-                        {invoice.paymentStatus}
+                        {item.description}
                       </span>
                     )}
                   </TableCell>
@@ -144,52 +93,48 @@ const DocumentBody = () => {
                     {editingRow === index ? (
                       <Input
                         type="text"
-                        value={
-                          tempValues.paymentMethod ?? invoice.paymentMethod
-                        }
-                        onChange={(e) => handleChange(e, "paymentMethod")}
+                        value={tempValues.rate ?? item.rate}
+                        onChange={(e) => handleChange(e, "rate")}
                         onBlur={() => handleBlur(index)}
                         className="h-3 w-20"
                       />
                     ) : (
                       <span
                         onDoubleClick={() =>
-                          handleDoubleClick(
-                            index,
-                            "paymentMethod",
-                            invoice.paymentMethod
-                          )
+                          handleDoubleClick(index, "rate", item.rate)
                         }
                       >
-                        {invoice.paymentMethod}
+                        {item.rate}
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell className="flex-1 text-left">
+                    {editingRow === index ? (
+                      <Input
+                        type="text"
+                        value={tempValues.quantity ?? item.quantity}
+                        onChange={(e) => handleChange(e, "quantity")}
+                        onBlur={() => handleBlur(index)}
+                        className="h-3 w-20"
+                      />
+                    ) : (
+                      <span
+                        onDoubleClick={() =>
+                          handleDoubleClick(index, "quantity", item.quantity)
+                        }
+                      >
+                        {item.quantity}
                       </span>
                     )}
                   </TableCell>
                   <TableCell className="w-[100px] text-right">
-                    {editingRow === index ? (
-                      <Input
-                        type="text"
-                        value={tempValues.totalAmount ?? invoice.totalAmount}
-                        onChange={(e) => handleChange(e, "totalAmount")}
-                        onBlur={() => handleBlur(index)}
-                        className="h-3 w-20"
-                      />
-                    ) : (
-                      <span
-                        onDoubleClick={() =>
-                          handleDoubleClick(
-                            index,
-                            "totalAmount",
-                            invoice.totalAmount
-                          )
-                        }
-                      >
-                        {invoice.totalAmount}
-                      </span>
-                    )}
+                    {(item.quantity * item.rate).toFixed(2)}
                   </TableCell>
                   <TableCell className="flex w-[100px] justify-end text-left">
-                    <TrashIcon className="h-4 w-4 cursor-pointer" />
+                    <TrashIcon
+                      className="h-4 w-4 cursor-pointer"
+                      onClick={() => removeItem(item.description)}
+                    />
                   </TableCell>
                 </TableRow>
               </Reorder.Item>

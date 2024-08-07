@@ -1,17 +1,45 @@
-import { Button } from "@/components/ui";
-import { Trash2 } from "lucide-react";
-import { DatePicker } from "./date-picker";
-import { ClientInfoModal } from "./modals/client-info-modal";
+import {
+  Button,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui";
+import { CalendarDays, Trash2 } from "lucide-react";
+import { Calendar } from "@/components/ui";
+import useClientInfoStore from "@/zustand/client-store";
+import { format } from "date-fns";
+import { ClientNameModal } from "./modals/client-name-modal";
+
 const ClientInfo = () => {
+  const { clientInfo, setClientInfo, removeClientInfo } = useClientInfoStore();
+
   return (
     <div className="mt-10 flex flex-row items-start justify-between">
       <div>
         <p className="text-sm text-gray-500">Billed To</p>
-        <p>ali smap</p>
-        <ClientInfoModal />
+        {/* <div onDoubleClick={handleDoubleClick}>
+          {isEditing ? (
+            <input
+              type="text"
+              value={clientInfo.fullName}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              onKeyDown={handleKeyDown}
+              autoFocus
+              className="border rounded p-1"
+            />
+          ) : (
+            <p>{clientInfo.fullName}</p>
+          )}
+        </div> */}
+        <p>{clientInfo.fullName}</p>
+        <ClientNameModal />
+
+        {/* <ClientInfoModal /> */}
         <Button
-          variant={"link"}
+          variant="link"
           className="-mt-2 flex flex-row gap-1 p-0 font-normal"
+          onClick={removeClientInfo}
         >
           <Trash2 className="text-primary h-4 w-4" />
           Remove client
@@ -21,15 +49,69 @@ const ClientInfo = () => {
         <div>
           <p className="text-sm text-gray-500">Date of issue</p>
           <div className="flex flex-row items-center gap-1">
-            <p>2024-07-01</p>
-            <DatePicker />
+            <p>
+              {clientInfo.dateOfIssue
+                ? format(clientInfo.dateOfIssue, "yyyy/MM/dd")
+                : "Select Date"}
+            </p>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="link"
+                  className="flex flex-row gap-1 p-0 font-normal"
+                >
+                  <CalendarDays className="text-primary h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={clientInfo.dateOfIssue ?? new Date()}
+                  onSelect={(val) => {
+                    if (val) {
+                      setClientInfo({
+                        dateOfIssue: val,
+                      });
+                    }
+                  }}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
         <div>
           <p className="text-sm text-gray-500">Due Date</p>
           <div className="flex flex-row items-center gap-1">
-            <p>2024-07-01</p>
-            <DatePicker />
+            <p>
+              {clientInfo.dueDate
+                ? format(clientInfo.dueDate, "yyyy/MM/dd")
+                : "Select Date"}
+            </p>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="link"
+                  className="flex flex-row gap-1 p-0 font-normal"
+                >
+                  <CalendarDays className="text-primary h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={clientInfo.dueDate ?? new Date()}
+                  onSelect={(val) => {
+                    if (val) {
+                      setClientInfo({
+                        dueDate: val,
+                      });
+                    }
+                  }}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
       </div>
@@ -37,7 +119,6 @@ const ClientInfo = () => {
         <p className="text-sm text-gray-500">Invoice Number</p>
         <p>0000273</p>
       </div>
-
       <div>
         <p className="text-sm text-gray-500">Amount Due (MAD)</p>
         <p className="text-xl">1,2238 DHS</p>
